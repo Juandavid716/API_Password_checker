@@ -7,7 +7,7 @@ import os
 def create_connection():
     connection = None
     try:
-        Connect to an existing database
+        #Connect to an existing database
         url = urlparse.urlparse(os.environ['DATABASE_URL'])
         dbname = url.path[1:]
         user = url.username
