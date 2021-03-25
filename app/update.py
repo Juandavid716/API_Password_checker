@@ -1,4 +1,4 @@
-from app.database import create_connection
+from app.settings import create_connection
 import app.main
 from collections import Counter
 
@@ -20,39 +20,41 @@ def update_4D_5D(list_s,  num, name_table, con, total, new_total):
             p = "".join(str(x) for x in key)
             ''.join(map(str,p))
 
-        vals = cur.execute("SELECT probability FROM {} WHERE dimension=?".format(name_table), (p, )).fetchone()
+        cur.execute("SELECT probability FROM {} WHERE dimension= %s".format(name_table), (p, ))
+        vals = cur.fetchone()
         if vals:
             old_probability = vals[0]
       
             new_probability = float(old_probability)* total / (total + new_total) + float(list_s[key]) / (total + new_total)
            
-            cur.execute(" UPDATE {} SET probability = ? WHERE dimension =?".format(name_table),(new_probability,p))
+            cur.execute(" UPDATE {} SET probability = %s WHERE dimension =%s".format(name_table),(new_probability,p))
             print("omg")
             con.commit()
         else:
             new_probability = float(list_s[key]) / (total + new_total)
             print("done")
-            cur.execute("INSERT OR IGNORE INTO {} (dimension, probability) VALUES (?, ?)".format(name_table),(p,new_probability))
+            cur.execute("INSERT INTO {} (dimension, probability) VALUES (%s, %s)  ON CONFLICT (dimension) DO NOTHING".format(name_table),(p,new_probability))
             con.commit()
 
 def update_dimensions(list_dimension, name_table, con ,total, new_total):
     cur = con.cursor() 
     for p in list_dimension:
-        vals = cur.execute("SELECT probability FROM {} WHERE dimension=?".format(name_table), (p, )).fetchone()
+        cur.execute("SELECT probability FROM {} WHERE dimension=%s".format(name_table), (p, ))
+        vals = cur.fetchone()
         if vals:
             old_probability = vals[0]
             new_probability = float(old_probability)* total / (total + new_total) + float(list_dimension[p]) / (total + new_total)
-            cur.execute(" UPDATE {} SET probability = ? WHERE dimension =?".format(name_table),(new_probability,p))
+            cur.execute(" UPDATE {} SET probability = %s WHERE dimension =%s".format(name_table),(new_probability,p))
             con.commit()
             
         else:
             new_probability = float(list_dimension[p]) / (total + new_total)
             
-            cur.execute("INSERT OR IGNORE INTO {} (dimension, probability) VALUES (?, ?)".format(name_table),(p,new_probability))
+            cur.execute("INSERT INTO {} (dimension, probability) VALUES (%s, %s)  ON CONFLICT (dimension) DO NOTHING".format(name_table),(p,new_probability))
             con.commit()
 
 def update_data(file, total):
-    con = create_connection(r'./app/databases/test.db')
+    con = create_connection()
     cur = con.cursor() 
 
     data = app.main.get_list(file)
