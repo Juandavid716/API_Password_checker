@@ -200,8 +200,11 @@ def main(password):
     list = get_list(name_file)
     length = len(list)
     length_hash_table = get_record(cur,"SELECT COUNT(*) FROM hash_table")
-    last_record = get_record(cur,"SELECT * FROM hash_table ORDER BY id DESC LIMIT 1")
+    
+    last_record = get_record(cur,"SELECT hash_t FROM hash_table ORDER BY id DESC LIMIT 1")
+    print(last_record)
     number_hash = get_hash(name_file)
+    print(number_hash)
     create_size(con,length)
     if length_hash_table == 0 or number_hash != last_record:
         
