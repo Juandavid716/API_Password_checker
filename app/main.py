@@ -1,5 +1,6 @@
 from collections import Counter
-from app.database import create_connection
+#from app.database import create_connection
+from app.settings import create_connection
 from app.create_tables import create_table
 from app.create_tables import create_table_hash
 from app.create_tables import create_size
@@ -31,7 +32,8 @@ def read_L1_L2():
     return res,res2
     
 def get_record(cur,query):
-    value = cur.execute(query).fetchone()
+    cur.execute(query)
+    value = cur.fetchone()
     
     if value == None:
         value = 0
@@ -186,9 +188,10 @@ def get_133t_transformation(list_baseword):
 def main(password):
     #Connection
     start = timeit.default_timer()
-    con = create_connection(r'./app/databases/test.db')
+    con = create_connection()
+    print("Connected")
     cur = con.cursor() 
-    name_file = "./app/generated_pass.txt"
+    name_file = "./app/proof.txt"
     # Hash section - check if a txt from passwords has been changed. If it has been changed, it's necessary to find again L1 and L2 values. 
     
     create_table_hash(con)
@@ -197,17 +200,17 @@ def main(password):
     list = get_list(name_file)
     length = len(list)
     length_hash_table = get_record(cur,"SELECT COUNT(*) FROM hash_table")
-    last_record = get_record(cur,"SELECT * FROM hash_table ORDER BY ROWID DESC LIMIT 1")
+    last_record = get_record(cur,"SELECT * FROM hash_table ORDER BY id DESC LIMIT 1")
     number_hash = get_hash(name_file)
     create_size(con,length)
     if length_hash_table == 0 or number_hash != last_record:
         
         #Create tables
-        create_table("prefix_table", cur)
-        create_table("suffix_table", cur)
-        create_table("baseword_table", cur)
-        create_table("shift_table", cur)
-        create_table("table_133t", cur)
+        create_table("prefix_table", con)
+        create_table("suffix_table", con)
+        create_table("baseword_table", con)
+        create_table("shift_table", con)
+        create_table("table_133t", con)
         
         print("Tables created")
         # Get lists
@@ -241,11 +244,11 @@ def main(password):
         print("prefix 133t created")
         
         # Insertions list on database 
-        cur.executemany("""INSERT INTO  prefix_table (dimension,probability) VALUES (?,?)""", zip(list_prefix,list_prob_prefix))
-        cur.executemany("""INSERT INTO  suffix_table (dimension,probability) VALUES (?,?)""", zip(list_suffix,list_prob_suffix))
-        cur.executemany("""INSERT INTO  baseword_table (dimension,probability) VALUES (?,?)""", zip(list_baseword,list_prob_basew))
-        cur.executemany("""INSERT INTO  shift_table (dimension,probability) VALUES (?,?)""", zip(list_shift,list_prob_shift))
-        cur.executemany("""INSERT INTO  table_133t (dimension,probability) VALUES (?,?)""", zip(list_133t,list_prob_133t))
+        cur.executemany("""INSERT INTO  prefix_table (dimension,probability)  VALUES (%s, %s)""", zip(list_prefix,list_prob_prefix))
+        cur.executemany("""INSERT INTO  suffix_table (dimension,probability) VALUES (%s, %s)""", zip(list_suffix,list_prob_suffix))
+        cur.executemany("""INSERT INTO  baseword_table (dimension,probability) VALUES (%s, %s)""", zip(list_baseword,list_prob_basew))
+        cur.executemany("""INSERT INTO  shift_table (dimension,probability) VALUES (%s, %s)""", zip(list_shift,list_prob_shift))
+        cur.executemany("""INSERT INTO  table_133t (dimension,probability) VALUES (%s, %s)""", zip(list_133t,list_prob_133t))
         con.commit()
 
         print("insertions created")
@@ -258,14 +261,14 @@ def main(password):
     if(lg_new_list>0):
         
         # get total size from original dataset.
-        total = get_record(cur,"SELECT * FROM length_table ORDER BY ROWID DESC LIMIT 1")
+        total = get_record(cur,"SELECT * FROM length_table ORDER BY length_t DESC LIMIT 1")
         print(total)
         #Update the dataset
-        update.update_data("./app/passwords.txt",total)
+        app.update.update_data("./app/passwords.txt",total)
 
         #Update size 
         new_total = total + lg_new_list
-        cur.execute("INSERT OR IGNORE INTO length_table (length_t) VALUES (?)",(new_total,))
+        cur.execute("INSERT  INTO length_table (length_t) VALUES ({}) ON CONFLICT (length_t) DO NOTHING".format(new_total))
         con.commit()
         # Delete all elements from file with new passwords
         file = open('./app/passwords.txt','w')
@@ -274,11 +277,16 @@ def main(password):
 
 
     # Get probabilities sorted by highest probability
-    prefix_probabilities = cur.execute("SELECT * FROM prefix_table ORDER BY CAST(probability as FLOAT) DESC ").fetchall()
-    suffix_probabilities = cur.execute("SELECT * FROM suffix_table ORDER BY CAST(probability as FLOAT) DESC ").fetchall()
-    baseword_probabilities = cur.execute("SELECT * FROM baseword_table ORDER BY CAST(probability as FLOAT) DESC ").fetchall()
-    shift_probabilities = cur.execute("SELECT * FROM shift_table ORDER BY CAST(probability as FLOAT)  DESC ").fetchall()
-    t133_probabilities = cur.execute("SELECT * FROM table_133t ORDER BY CAST(probability as FLOAT)  DESC ").fetchall()
+    cur.execute("SELECT * FROM prefix_table ORDER BY CAST(probability as FLOAT) DESC ")
+    prefix_probabilities = cur.fetchall()
+    cur.execute("SELECT * FROM suffix_table ORDER BY CAST(probability as FLOAT) DESC ")
+    suffix_probabilities = cur.fetchall() 
+    cur.execute("SELECT * FROM baseword_table ORDER BY CAST(probability as FLOAT) DESC ")
+    baseword_probabilities = cur.fetchall() 
+    cur.execute("SELECT * FROM shift_table ORDER BY CAST(probability as FLOAT)  DESC ")
+    shift_probabilities =  cur.fetchall() 
+    cur.execute("SELECT * FROM table_133t ORDER BY CAST(probability as FLOAT)  DESC ")
+    t133_probabilities =  cur.fetchall() 
 
     print("probabilities calculated")
     
@@ -300,7 +308,7 @@ def main(password):
     
     if length_hash_table == 0 or number_hash != last_record or lg_new_list>0:
         write_L1_L2(P,dimensiones, gamma,b,p )
-        cur.execute('INSERT INTO hash_table VALUES(?)', [number_hash])
+        cur.execute("""INSERT INTO hash_table(hash_t) VALUES (%(player)s)""", {'player': number_hash })
         con.commit()
     
     print("Reading L1 and L2 values ...")  

@@ -52,18 +52,18 @@ def update_dimensions(list_dimension, name_table, con ,total, new_total):
             con.commit()
 
 def update_data(file, total):
-    con = create_connection(r'./databases/test.db')
+    con = create_connection(r'./app/databases/test.db')
     cur = con.cursor() 
 
-    data = main.get_list(file)
+    data = app.main.get_list(file)
     new_total = len(data)
-    list_prefix, list_without_prefix = main.get_prefix(data)
+    list_prefix, list_without_prefix = app.main.get_prefix(data)
     print("done list prefix")
-    list_suffix, list_baseword = main.get_suffix(list_without_prefix)
+    list_suffix, list_baseword = app.main.get_suffix(list_without_prefix)
     print("done list suffix")
-    list_shift = main.shift_pattern(list_baseword)
+    list_shift = app.main.shift_pattern(list_baseword)
     print("done list shift")
-    list_133t, list_baseword = main.get_133t_transformation(list_baseword)
+    list_133t, list_baseword = app.main.get_133t_transformation(list_baseword)
     print("done listb")
     #Frequencies
     prefix = get_repeated(list_prefix)

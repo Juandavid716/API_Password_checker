@@ -111,9 +111,13 @@ def rank_estimation(L1, L2, password,con, b):
                     P1=p[:i]
                     unLeetP2=p[i:j]
                     P3=p[j:]
-                    pp1_result=cur.execute("SELECT probability FROM prefix_table WHERE dimension = ?", (P1,)).fetchone()
-                    pp2_result=cur.execute("SELECT probability FROM baseword_table WHERE dimension = ?", (unLeetP2,)).fetchone()
-                    pp3_result=cur.execute("SELECT probability FROM suffix_table WHERE dimension = ?", (P3,)).fetchone()
+                    cur.execute("SELECT probability FROM prefix_table WHERE dimension = %s", (P1,))
+                    pp1_result = cur.fetchone()
+                    cur.execute("SELECT probability FROM baseword_table WHERE dimension =  %s", (unLeetP2,))
+                    pp2_result= cur.fetchone()
+                    cur.execute("SELECT probability FROM suffix_table WHERE dimension =  %s", (P3,))
+                    pp3_result=cur.fetchone()
+                   
                     pp1 = condition(pp1_result)
                     pp2 = condition(pp2_result)
                     pp3 = condition(pp3_result)
@@ -126,8 +130,12 @@ def rank_estimation(L1, L2, password,con, b):
             pos1="[]"
             pos2="[]"
             if maxProb>0:
-                pp4_result=cur.execute("SELECT probability FROM shift_table WHERE dimension = ?", (pos1,)).fetchone()
-                pp5_result=cur.execute("SELECT probability FROM table_133t WHERE dimension = ?", (pos2,)).fetchone()
+                cur.execute("SELECT probability FROM shift_table WHERE dimension =  %s", (pos1,))
+                pp4_result=cur.fetchone()
+
+                cur.execute("SELECT probability FROM table_133t WHERE dimension =  %s", (pos2,))
+                pp5_result= cur.fetchone() 
+                
 
                 pp4 = condition(pp4_result)
                 
@@ -159,11 +167,17 @@ def rank_estimation(L1, L2, password,con, b):
             unLeetP2,pos2=transform_133t(unShiftP2)
             pos1 = str(pos1).replace(' ','')
             
-            pp1_result=cur.execute("SELECT probability FROM prefix_table WHERE dimension = ?", (P1,)).fetchone()
-            pp2_result=cur.execute("SELECT probability FROM baseword_table WHERE dimension = ?", (unLeetP2,)).fetchone()
-            pp3_result=cur.execute("SELECT probability FROM suffix_table WHERE dimension = ?", (P3,)).fetchone()
-            pp4_result=cur.execute("SELECT probability FROM shift_table WHERE dimension = ?", (pos1,)).fetchone()
-            pp5_result=cur.execute("SELECT probability FROM table_133t WHERE dimension = ?", (pos2,)).fetchone()
+            cur.execute("SELECT probability FROM prefix_table WHERE dimension = %s", (P1,))
+            pp1_result = cur.fetchone()
+            cur.execute("SELECT probability FROM baseword_table WHERE dimension =  %s", (unLeetP2,))
+            pp2_result= cur.fetchone()
+            cur.execute("SELECT probability FROM suffix_table WHERE dimension =  %s", (P3,))
+            pp3_result=cur.fetchone()
+            cur.execute("SELECT probability FROM shift_table WHERE dimension =  %s", (pos1,))
+            pp4_result=cur.fetchone()
+            cur.execute("SELECT probability FROM table_133t WHERE dimension =  %s", (pos2,))
+            pp5_result= cur.fetchone() 
+
             pp1 = condition(pp1_result)
             pp2 = condition(pp2_result)
             pp3 = condition(pp3_result)

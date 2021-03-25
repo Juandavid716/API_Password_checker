@@ -1,5 +1,6 @@
 
-def create_table(name_table, cur):
+def create_table(name_table, con):
+    cur = con.cursor() 
     query = """
      CREATE TABLE IF NOT EXISTS {} (
         dimension TEXT PRIMARY KEY NOT NULL,
@@ -7,6 +8,7 @@ def create_table(name_table, cur):
 
     cur.execute(query)
     cur.execute("DELETE FROM {}".format(name_table))
+    con.commit()
 
 def create_size(con, length_x):
     cur = con.cursor() 
@@ -15,13 +17,16 @@ def create_size(con, length_x):
         length_t INTEGER PRIMARY KEY NOT NULL DEFAULT '{}'
         )""".format(length_x)
     cur.execute(query)
-    cur.execute("INSERT OR IGNORE INTO length_table (length_t) VALUES (?)",(length_x,))
+    cur.execute("INSERT INTO length_table (length_t) VALUES ({}) ON CONFLICT  (length_t) DO NOTHING".format(length_x))
     con.commit()
 
-def create_table_hash( cur):
+def create_table_hash(con):
+    cur = con.cursor() 
     query = """
      CREATE TABLE IF NOT EXISTS {} (
-        hash_t VARCHAR(30) NOT NULL)""".format("hash_table")
+        id SERIAL,
+        hash_t VARCHAR(100) NOT NULL)""".format("hash_table")
 
     cur.execute(query)
+    con.commit()
     #cur.execute("DELETE FROM {}".format(name_table))
