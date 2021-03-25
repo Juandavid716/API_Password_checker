@@ -22,9 +22,9 @@ def create_connection():
                      port=port
                      )
 
-
+        print(connection)
         # connection = psycopg2.connect(user="postgres", password="juandaxdd", host="127.0.0.1",port="5432", dbname="postgres")
-        # print(connection)
+        
 
         # Create a cursor to perform database operations
         cursor = connection.cursor()
