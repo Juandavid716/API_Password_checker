@@ -1,5 +1,6 @@
 
 import psycopg2
+import urllib.parse as urlparse
 from psycopg2 import Error
 import os
 
