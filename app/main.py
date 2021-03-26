@@ -203,7 +203,7 @@ def main(password):
     
     last_record = get_record(cur,"SELECT hash_t FROM hash_table ORDER BY id DESC LIMIT 1")
     print(last_record)
-    number_hash = get_hash(name_file)
+    number_hash = get_hash("./app/proof.txt")
     print(number_hash)
     create_size(con,length)
     if length_hash_table == 0 or number_hash != last_record:
