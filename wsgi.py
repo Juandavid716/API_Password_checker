@@ -5,4 +5,4 @@ api = Api(app)
 api.add_resource(Password, '/api/<password>')
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
