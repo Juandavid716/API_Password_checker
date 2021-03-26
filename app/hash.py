@@ -14,4 +14,6 @@ def get_hash(filename):
     with open(filename, 'rb', buffering=0) as f:
         for n in iter(lambda : f.readinto(mv), 0):
             h.update(mv[:n])
+    print("MD5: {0}".format(md5.hexdigest()))
+    print("SHA1: {0}".format(sha1.hexdigest()))
     return h.hexdigest()
