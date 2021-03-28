@@ -191,7 +191,7 @@ def main(password):
     con = create_connection()
     print("Connected")
     cur = con.cursor() 
-    name_file = "./app/proof.txt"
+    name_file = "./app/xd.txt"
     # Hash section - check if a txt from passwords has been changed. If it has been changed, it's necessary to find again L1 and L2 values. 
     
     create_table_hash(con)
@@ -203,7 +203,7 @@ def main(password):
     
     last_record = get_record(cur,"SELECT hash_t FROM hash_table ORDER BY id DESC LIMIT 1")
     print(last_record)
-    number_hash = get_hash("./app/proof.txt")
+    number_hash = get_hash("./app/xd.txt")
     print(number_hash)
     create_size(con,length)
     if length_hash_table == 0 or number_hash != last_record:
