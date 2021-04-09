@@ -273,87 +273,60 @@ def main(password):
             
 
 
-        # Get probabilities sorted by highest probability
-        cur.execute("SELECT * FROM prefix_table ORDER BY CAST(probability as FLOAT) DESC ")
-        prefix_probabilities = cur.fetchall()
-        cur.execute("SELECT * FROM suffix_table ORDER BY CAST(probability as FLOAT) DESC ")
-        suffix_probabilities = cur.fetchall() 
-        cur.execute("SELECT * FROM baseword_table ORDER BY CAST(probability as FLOAT) DESC ")
-        baseword_probabilities = cur.fetchall() 
-        cur.execute("SELECT * FROM shift_table ORDER BY CAST(probability as FLOAT)  DESC ")
-        shift_probabilities =  cur.fetchall() 
-        cur.execute("SELECT * FROM table_133t ORDER BY CAST(probability as FLOAT)  DESC ")
-        t133_probabilities =  cur.fetchall() 
+    # Get probabilities sorted by highest probability
+    cur.execute("SELECT * FROM prefix_table ORDER BY CAST(probability as FLOAT) DESC ")
+    prefix_probabilities = cur.fetchall()
+    cur.execute("SELECT * FROM suffix_table ORDER BY CAST(probability as FLOAT) DESC ")
+    suffix_probabilities = cur.fetchall() 
+    cur.execute("SELECT * FROM baseword_table ORDER BY CAST(probability as FLOAT) DESC ")
+    baseword_probabilities = cur.fetchall() 
+    cur.execute("SELECT * FROM shift_table ORDER BY CAST(probability as FLOAT)  DESC ")
+    shift_probabilities =  cur.fetchall() 
+    cur.execute("SELECT * FROM table_133t ORDER BY CAST(probability as FLOAT)  DESC ")
+    t133_probabilities =  cur.fetchall() 
 
-        print("probabilities calculated")
+    print("probabilities calculated")
         
-        P1 = get_probability_sorted(prefix_probabilities)
-        P2 = get_probability_sorted(suffix_probabilities)
-        P3 = get_probability_sorted(baseword_probabilities)
-        P4 = get_probability_sorted(shift_probabilities)
-        P5 = get_probability_sorted(t133_probabilities)
+    P1 = get_probability_sorted(prefix_probabilities)
+    P2 = get_probability_sorted(suffix_probabilities)
+    P3 = get_probability_sorted(baseword_probabilities)
+    P4 = get_probability_sorted(shift_probabilities)
+    P5 = get_probability_sorted(t133_probabilities)
 
-        print("Prob ordered")
-        # P = List of lists 
-        P = [P1,P2,P3,P4,P5]
-        LP = [len(P1),len(P2),len(P3),len(P4),len(P5)]
-        minimum = np.min(LP)
-        dimensiones=5
-        b= minimum.item()
-        gamma= (b+1) / b
-        p=P1[4]*P2[2]*P3[2]*P4[2]*P5[6]
+    print("Prob ordered")
+    # P = List of lists 
+    P = [P1,P2,P3,P4,P5]
+    LP = [len(P1),len(P2),len(P3),len(P4),len(P5)]
+    minimum = np.min(LP)
+    dimensiones=5
+    b= minimum.item()
+    gamma= (b+1) / b
+    p=P1[4]*P2[2]*P3[2]*P4[2]*P5[6]
         
-        if length_hash_table == 0 or number_hash != last_record or lg_new_list>0:
-            write_L1_L2(P,dimensiones, gamma,b,p )
-            cur.execute("""INSERT INTO hash_table(hash_t) VALUES (%(player)s)""", {'player': number_hash })
-            con.commit()
+    if length_hash_table == 0 or number_hash != last_record or lg_new_list>0 or ENV=="DEV":
+        write_L1_L2(P,dimensiones, gamma,b,p )
+        cur.execute("""INSERT INTO hash_table(hash_t) VALUES (%(player)s)""", {'player': number_hash })
+        con.commit()
         
-        print("Reading L1 and L2 values ...")  
-        L1, L2 = read_L1_L2()
-        R = rank_estimation(L1,L2,password,con, b)
-        numbits=0
-        if R == -5:
-            print("None")
-        elif R == 0:
-            print("Equals to 0")
-        else:
-            numbits=np.ceil(np.log2(R))
-            print("Bits number", numbits)
-            print("With an enumeration of", int(2**(numbits)), " candidates passwords is possible to recover this password ")
-
-        stop = timeit.default_timer()
-
-        print('Time: ', stop - start)
-
-        return int(2**(numbits))
-
+    print("Reading L1 and L2 values ...")  
+    L1, L2 = read_L1_L2()
+    R = rank_estimation(L1,L2,password,con, b)
+    numbits=0
+    if R == -5:
+        print("None")
+    elif R == 0:
+        print("Equals to 0")
     else:
-        P = [P1,P2,P3,P4,P5]
-        LP = [len(P1),len(P2),len(P3),len(P4),len(P5)]
-        minimum = np.min(LP)
-        dimensiones=5
-        b= minimum.item()
-        gamma= (b+1) / b
-        p=P1[4]*P2[2]*P3[2]*P4[2]*P5[6]
+        numbits=np.ceil(np.log2(R))
+        print("Bits number", numbits)
+        print("With an enumeration of", int(2**(numbits)), " candidates passwords is possible to recover this password ")
 
-        print("Reading L1 and L2 values ...")  
-        L1, L2 = read_L1_L2()
-        R = rank_estimation(L1,L2,password,con, b)
-        numbits=0
-        if R == -5:
-            print("None")
-        elif R == 0:
-            print("Equals to 0")
-        else:
-            numbits=np.ceil(np.log2(R))
-            print("Bits number", numbits)
-            print("With an enumeration of", int(2**(numbits)), " candidates passwords is possible to recover this password ")
+    stop = timeit.default_timer()
 
-        stop = timeit.default_timer()
+    print('Time: ', stop - start)
 
-        print('Time: ', stop - start)
+    return int(2**(numbits))
 
-        return int(2**(numbits))
 
 
 if __name__ == "__main__":
