@@ -311,21 +311,22 @@ def main(password):
         print("Reading L1 and L2 values ...")  
         L1, L2 = read_L1_L2()
         R = rank_estimation(L1,L2,password,con, b)
-
+        numbits=0
         if R == -5:
             print("None")
         elif R == 0:
             print("Equals to 0")
         else:
-        numbits=np.ceil(np.log2(R))
-        print("Bits number", numbits)
-        print("With an enumeration of", int(2**(numbits)), " candidates passwords is possible to recover this password ")
+            numbits=np.ceil(np.log2(R))
+            print("Bits number", numbits)
+            print("With an enumeration of", int(2**(numbits)), " candidates passwords is possible to recover this password ")
 
         stop = timeit.default_timer()
 
         print('Time: ', stop - start)
 
         return int(2**(numbits))
+
     else:
         P = [P1,P2,P3,P4,P5]
         LP = [len(P1),len(P2),len(P3),len(P4),len(P5)]
@@ -338,15 +339,15 @@ def main(password):
         print("Reading L1 and L2 values ...")  
         L1, L2 = read_L1_L2()
         R = rank_estimation(L1,L2,password,con, b)
-
+        numbits=0
         if R == -5:
             print("None")
         elif R == 0:
             print("Equals to 0")
         else:
-        numbits=np.ceil(np.log2(R))
-        print("Bits number", numbits)
-        print("With an enumeration of", int(2**(numbits)), " candidates passwords is possible to recover this password ")
+            numbits=np.ceil(np.log2(R))
+            print("Bits number", numbits)
+            print("With an enumeration of", int(2**(numbits)), " candidates passwords is possible to recover this password ")
 
         stop = timeit.default_timer()
 
