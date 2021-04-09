@@ -302,11 +302,12 @@ def main(password):
     b= minimum.item()
     gamma= (b+1) / b
     p=P1[4]*P2[2]*P3[2]*P4[2]*P5[6]
-        
-    if length_hash_table == 0 or number_hash != last_record or lg_new_list>0 or ENV=="DEV":
-        write_L1_L2(P,dimensiones, gamma,b,p )
-        cur.execute("""INSERT INTO hash_table(hash_t) VALUES (%(player)s)""", {'player': number_hash })
-        con.commit()
+    
+    if ENV=="DEV":
+        if length_hash_table == 0 or number_hash != last_record or lg_new_list>0 :
+            write_L1_L2(P,dimensiones, gamma,b,p )
+            cur.execute("""INSERT INTO hash_table(hash_t) VALUES (%(player)s)""", {'player': number_hash })
+            con.commit()
         
     print("Reading L1 and L2 values ...")  
     L1, L2 = read_L1_L2()
