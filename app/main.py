@@ -193,146 +193,166 @@ def main(password):
     cur = con.cursor() 
     name_file = "./app/xd.txt"
     # Hash section - check if a txt from passwords has been changed. If it has been changed, it's necessary to find again L1 and L2 values. 
-    
-    create_table_hash(con)
+    ENV="PROD"
+    if ENV="DEV":
+        create_table_hash(con)
 
-    #dataset
-    list = get_list(name_file)
-    length = len(list)
-    length_hash_table = get_record(cur,"SELECT COUNT(*) FROM hash_table")
-    
-    last_record = get_record(cur,"SELECT hash_t FROM hash_table ORDER BY id DESC LIMIT 1")
-    print(last_record)
-    number_hash = get_hash("./app/xd.txt")
-    print(number_hash)
-    create_size(con,length)
-    if length_hash_table == 0 or number_hash != last_record:
+        #dataset
+        list = get_list(name_file)
+        length = len(list)
+        length_hash_table = get_record(cur,"SELECT COUNT(*) FROM hash_table")
         
-        #Create tables
-        create_table("prefix_table", con)
-        create_table("suffix_table", con)
-        create_table("baseword_table", con)
-        create_table("shift_table", con)
-        create_table("table_133t", con)
+        last_record = get_record(cur,"SELECT hash_t FROM hash_table ORDER BY id DESC LIMIT 1")
+        print(last_record)
+        number_hash = get_hash("./app/xd.txt")
+        print(number_hash)
+        create_size(con,length)
+        if length_hash_table == 0 or number_hash != last_record:
+            
+            #Create tables
+            create_table("prefix_table", con)
+            create_table("suffix_table", con)
+            create_table("baseword_table", con)
+            create_table("shift_table", con)
+            create_table("table_133t", con)
+            
+            print("Tables created")
+            # Get lists
+            
+            list_prefix, list_without_prefix = get_prefix(list)
+            print("prefix list created")
+            list_suffix, list_baseword = get_suffix(list_without_prefix)
+            print("suffix list created")
+            list_shift = shift_pattern(list_baseword)
+            print("shift list created")
+            list_133t, list_baseword = get_133t_transformation(list_baseword)
+            print("133t list created")
+
+            # List of probabilities
+            list_prefix, list_prob_prefix =  get_frequency(list_prefix, length)
+            print("prefix prob created")
+            list_baseword, list_prob_basew = get_frequency(list_baseword, length)
+            print("prefix base created")
+            list_suffix, list_prob_suffix= get_frequency(list_suffix, length)
+            print("prefix suf created")
+            list_shift, list_prob_shift = get_frequency_shift(list_shift, length,0)
+            print("prefix shift created")
+            list_133t, list_prob_133t =  get_frequency_shift(list_133t, length,1)
+            print("prefix 133t created")
+            
+            # Insertions list on database 
+            cur.executemany("""INSERT INTO  prefix_table (dimension,probability)  VALUES (%s, %s)""", zip(list_prefix,list_prob_prefix))
+            cur.executemany("""INSERT INTO  suffix_table (dimension,probability) VALUES (%s, %s)""", zip(list_suffix,list_prob_suffix))
+            cur.executemany("""INSERT INTO  baseword_table (dimension,probability) VALUES (%s, %s)""", zip(list_baseword,list_prob_basew))
+            cur.executemany("""INSERT INTO  shift_table (dimension,probability) VALUES (%s, %s)""", zip(list_shift,list_prob_shift))
+            cur.executemany("""INSERT INTO  table_133t (dimension,probability) VALUES (%s, %s)""", zip(list_133t,list_prob_133t))
+            con.commit()
+
+            print("insertions created")
+
+        # Update section
+        new_list = get_list("./app/passwords.txt")
+        lg_new_list= len(new_list)
+
+
+        if(lg_new_list>0):
+            
+            # get total size from original dataset.
+            total = get_record(cur,"SELECT * FROM length_table ORDER BY length_t DESC LIMIT 1")
+            print(total)
+            #Update the dataset
+            app.update.update_data("./app/passwords.txt",total)
+
+            #Update size 
+            new_total = total + lg_new_list
+            cur.execute("INSERT  INTO length_table (length_t) VALUES ({}) ON CONFLICT (length_t) DO NOTHING".format(new_total))
+            con.commit()
+            # Delete all elements from file with new passwords
+            file = open('./app/passwords.txt','w')
+            file.close()
+            
+
+
+        # Get probabilities sorted by highest probability
+        cur.execute("SELECT * FROM prefix_table ORDER BY CAST(probability as FLOAT) DESC ")
+        prefix_probabilities = cur.fetchall()
+        cur.execute("SELECT * FROM suffix_table ORDER BY CAST(probability as FLOAT) DESC ")
+        suffix_probabilities = cur.fetchall() 
+        cur.execute("SELECT * FROM baseword_table ORDER BY CAST(probability as FLOAT) DESC ")
+        baseword_probabilities = cur.fetchall() 
+        cur.execute("SELECT * FROM shift_table ORDER BY CAST(probability as FLOAT)  DESC ")
+        shift_probabilities =  cur.fetchall() 
+        cur.execute("SELECT * FROM table_133t ORDER BY CAST(probability as FLOAT)  DESC ")
+        t133_probabilities =  cur.fetchall() 
+
+        print("probabilities calculated")
         
-        print("Tables created")
-        # Get lists
+        P1 = get_probability_sorted(prefix_probabilities)
+        P2 = get_probability_sorted(suffix_probabilities)
+        P3 = get_probability_sorted(baseword_probabilities)
+        P4 = get_probability_sorted(shift_probabilities)
+        P5 = get_probability_sorted(t133_probabilities)
+
+        print("Prob ordered")
+        # P = List of lists 
+        P = [P1,P2,P3,P4,P5]
+        LP = [len(P1),len(P2),len(P3),len(P4),len(P5)]
+        minimum = np.min(LP)
+        dimensiones=5
+        b= minimum.item()
+        gamma= (b+1) / b
+        p=P1[4]*P2[2]*P3[2]*P4[2]*P5[6]
         
-        list_prefix, list_without_prefix = get_prefix(list)
-        print("prefix list created")
-        list_suffix, list_baseword = get_suffix(list_without_prefix)
-        print("suffix list created")
-        list_shift = shift_pattern(list_baseword)
-        print("shift list created")
-        list_133t, list_baseword = get_133t_transformation(list_baseword)
-        print("133t list created")
-
-        # # 5D MODEL
-        # print("Prefix list",list_prefix)
-        # print("Base word list",list_baseword)
-        # print("Suffix list", list_suffix)
-        # print("shift pattern list", list_shift)
-        # print("133t list",list_133t)
-
-        # List of probabilities
-        list_prefix, list_prob_prefix =  get_frequency(list_prefix, length)
-        print("prefix prob created")
-        list_baseword, list_prob_basew = get_frequency(list_baseword, length)
-        print("prefix base created")
-        list_suffix, list_prob_suffix= get_frequency(list_suffix, length)
-        print("prefix suf created")
-        list_shift, list_prob_shift = get_frequency_shift(list_shift, length,0)
-        print("prefix shift created")
-        list_133t, list_prob_133t =  get_frequency_shift(list_133t, length,1)
-        print("prefix 133t created")
+        if length_hash_table == 0 or number_hash != last_record or lg_new_list>0:
+            write_L1_L2(P,dimensiones, gamma,b,p )
+            cur.execute("""INSERT INTO hash_table(hash_t) VALUES (%(player)s)""", {'player': number_hash })
+            con.commit()
         
-        # Insertions list on database 
-        cur.executemany("""INSERT INTO  prefix_table (dimension,probability)  VALUES (%s, %s)""", zip(list_prefix,list_prob_prefix))
-        cur.executemany("""INSERT INTO  suffix_table (dimension,probability) VALUES (%s, %s)""", zip(list_suffix,list_prob_suffix))
-        cur.executemany("""INSERT INTO  baseword_table (dimension,probability) VALUES (%s, %s)""", zip(list_baseword,list_prob_basew))
-        cur.executemany("""INSERT INTO  shift_table (dimension,probability) VALUES (%s, %s)""", zip(list_shift,list_prob_shift))
-        cur.executemany("""INSERT INTO  table_133t (dimension,probability) VALUES (%s, %s)""", zip(list_133t,list_prob_133t))
-        con.commit()
+        print("Reading L1 and L2 values ...")  
+        L1, L2 = read_L1_L2()
+        R = rank_estimation(L1,L2,password,con, b)
 
-        print("insertions created")
+        if R == -5:
+            print("None")
+        elif R == 0:
+            print("Equals to 0")
+        else:
+        numbits=np.ceil(np.log2(R))
+        print("Bits number", numbits)
+        print("With an enumeration of", int(2**(numbits)), " candidates passwords is possible to recover this password ")
 
-    # Update section
-    new_list = get_list("./app/passwords.txt")
-    lg_new_list= len(new_list)
+        stop = timeit.default_timer()
 
+        print('Time: ', stop - start)
 
-    if(lg_new_list>0):
-        
-        # get total size from original dataset.
-        total = get_record(cur,"SELECT * FROM length_table ORDER BY length_t DESC LIMIT 1")
-        print(total)
-        #Update the dataset
-        app.update.update_data("./app/passwords.txt",total)
-
-        #Update size 
-        new_total = total + lg_new_list
-        cur.execute("INSERT  INTO length_table (length_t) VALUES ({}) ON CONFLICT (length_t) DO NOTHING".format(new_total))
-        con.commit()
-        # Delete all elements from file with new passwords
-        file = open('./app/passwords.txt','w')
-        file.close()
-        
-
-
-    # Get probabilities sorted by highest probability
-    cur.execute("SELECT * FROM prefix_table ORDER BY CAST(probability as FLOAT) DESC ")
-    prefix_probabilities = cur.fetchall()
-    cur.execute("SELECT * FROM suffix_table ORDER BY CAST(probability as FLOAT) DESC ")
-    suffix_probabilities = cur.fetchall() 
-    cur.execute("SELECT * FROM baseword_table ORDER BY CAST(probability as FLOAT) DESC ")
-    baseword_probabilities = cur.fetchall() 
-    cur.execute("SELECT * FROM shift_table ORDER BY CAST(probability as FLOAT)  DESC ")
-    shift_probabilities =  cur.fetchall() 
-    cur.execute("SELECT * FROM table_133t ORDER BY CAST(probability as FLOAT)  DESC ")
-    t133_probabilities =  cur.fetchall() 
-
-    print("probabilities calculated")
-    
-    P1 = get_probability_sorted(prefix_probabilities)
-    P2 = get_probability_sorted(suffix_probabilities)
-    P3 = get_probability_sorted(baseword_probabilities)
-    P4 = get_probability_sorted(shift_probabilities)
-    P5 = get_probability_sorted(t133_probabilities)
-
-    print("Prob ordered")
-    # P = List of lists 
-    P = [P1,P2,P3,P4,P5]
-    LP = [len(P1),len(P2),len(P3),len(P4),len(P5)]
-    minimum = np.min(LP)
-    dimensiones=5
-    b= minimum.item()
-    gamma= (b+1) / b
-    p=P1[4]*P2[2]*P3[2]*P4[2]*P5[6]
-    
-    if length_hash_table == 0 or number_hash != last_record or lg_new_list>0:
-        write_L1_L2(P,dimensiones, gamma,b,p )
-        cur.execute("""INSERT INTO hash_table(hash_t) VALUES (%(player)s)""", {'player': number_hash })
-        con.commit()
-    
-    print("Reading L1 and L2 values ...")  
-    L1, L2 = read_L1_L2()
-    R = rank_estimation(L1,L2,password,con, b)
-
-    if R == -5:
-        print("None")
-    elif R == 0:
-        print("Equals to 0")
+        return int(2**(numbits))
     else:
-      numbits=np.ceil(np.log2(R))
-      print("Bits number", numbits)
-      print("With an enumeration of", int(2**(numbits)), " candidates passwords is possible to recover this password ")
+        P = [P1,P2,P3,P4,P5]
+        LP = [len(P1),len(P2),len(P3),len(P4),len(P5)]
+        minimum = np.min(LP)
+        dimensiones=5
+        b= minimum.item()
+        gamma= (b+1) / b
+        p=P1[4]*P2[2]*P3[2]*P4[2]*P5[6]
 
-    stop = timeit.default_timer()
+        print("Reading L1 and L2 values ...")  
+        L1, L2 = read_L1_L2()
+        R = rank_estimation(L1,L2,password,con, b)
 
-    print('Time: ', stop - start)
+        if R == -5:
+            print("None")
+        elif R == 0:
+            print("Equals to 0")
+        else:
+        numbits=np.ceil(np.log2(R))
+        print("Bits number", numbits)
+        print("With an enumeration of", int(2**(numbits)), " candidates passwords is possible to recover this password ")
 
-    return int(2**(numbits))
+        stop = timeit.default_timer()
 
+        print('Time: ', stop - start)
+
+        return int(2**(numbits))
 
 
 if __name__ == "__main__":
