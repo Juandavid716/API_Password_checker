@@ -193,7 +193,7 @@ def main(password):
     cur = con.cursor() 
     name_file = "./app/xd.txt"
     # Hash section - check if a txt from passwords has been changed. If it has been changed, it's necessary to find again L1 and L2 values. 
-    ENV="DEV"
+    ENV="PROD"
     if ENV=="DEV":
         create_table_hash(con)
 
