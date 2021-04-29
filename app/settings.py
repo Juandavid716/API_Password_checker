@@ -10,24 +10,24 @@ def create_connection():
 
 
         #Connect to an existing database
-        url = urlparse.urlparse(os.environ['DATABASE_URL'])
-        dbname = url.path[1:]
-        user = url.username
-        password = url.password
-        host = url.hostname
-        port = url.port
+        # url = urlparse.urlparse(os.environ['DATABASE_URL'])
+        # dbname = url.path[1:]
+        # user = url.username
+        # password = url.password
+        # host = url.hostname
+        # port = url.port
 
-        connection = psycopg2.connect(
-                     dbname=dbname,
-                     user=user,
-                     password=password,
-                     host=host,
-                     port=port
-                     )
+        # connection = psycopg2.connect(
+        #              dbname=dbname,
+        #              user=user,
+        #              password=password,
+        #              host=host,
+        #              port=port
+        #              )
 
-        print(connection)
+        # print(connection)
         #connection = psycopg2.connect(user="postgres", password="juandaxdd", host="127.0.0.1",port="5432", dbname="postgres")
-        
+        connection = psycopg2.connect(user="postgres", password="Passwordchecker", host="database-1.cewowrwdmhiu.us-east-1.rds.amazonaws.com",port="5432", dbname="postgres")
 
         # Create a cursor to perform database operations
         cursor = connection.cursor()
