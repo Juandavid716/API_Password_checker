@@ -193,7 +193,7 @@ def main(password):
     cur = con.cursor() 
     name_file = "./app/xd.txt"
     # Hash section - check if a txt from passwords has been changed. If it has been changed, it's necessary to find again L1 and L2 values. 
-    ENV="DEV"
+    ENV="PROD"
     if ENV=="DEV":
         create_table_hash(con)
 
@@ -250,12 +250,14 @@ def main(password):
 
             print("insertions created")
 
-        # Update section
-        new_list = get_list("./app/passwords.txt")
-        lg_new_list= len(new_list)
+        
+            
+    # Update section
+    new_list = get_list("./app/passwords.txt")
+    lg_new_list= len(new_list)
 
 
-        if(lg_new_list>0):
+    if(lg_new_list>0):
             
             # get total size from original dataset.
             total = get_record(cur,"SELECT * FROM length_table ORDER BY length_t DESC LIMIT 1")
@@ -270,8 +272,6 @@ def main(password):
             # Delete all elements from file with new passwords
             file = open('./app/passwords.txt','w')
             file.close()
-            
-
 
     # Get probabilities sorted by highest probability
     cur.execute("SELECT * FROM prefix_table ORDER BY CAST(probability as FLOAT) DESC ")
@@ -298,6 +298,7 @@ def main(password):
     P = [P1,P2,P3,P4,P5]
     LP = [len(P1),len(P2),len(P3),len(P4),len(P5)]
     minimum = np.min(LP)
+    print(minimum)
     dimensiones=5
     b= minimum.item()
     gamma= (b+1) / b
