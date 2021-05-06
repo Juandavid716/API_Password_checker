@@ -329,17 +329,17 @@ def main(password):
     print('Time: ', stop - start)
 
     if(numbits <= 1073741824):
-        message =u'La contraseña es muy débil'
+        message =u'La contraseña es muy débil',"1"
       
         return message
     elif numbits > 1073741824 and numbits <= 1099511627776:
-        return u"La contraseña es débil"
+        return u"La contraseña es débil", "2"
     elif numbits > 1099511627776 and numbits <= 1152921504606846976:
-        return "La contraseña es aceptable"
+        return "La contraseña es aceptable", "3"
     elif numbits > 1152921504606846976 and numbits <= 1180591620717411303424:
-        return "La contraseña es segura"
+        return "La contraseña es segura", "4"
     else:
-        return "La contraseña es muy segura"
+        return "La contraseña es muy segura", "5"
     
     return int(2**(numbits))
 
