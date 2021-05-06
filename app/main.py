@@ -323,6 +323,7 @@ def main(password):
         print("Bits number", numbits)
         print("With an enumeration of", int(2**(numbits)), " candidates passwords is possible to recover this password ")
 
+    numbits = int(2**(numbits))
     stop = timeit.default_timer()
 
     print('Time: ', stop - start)
