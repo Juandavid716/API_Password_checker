@@ -15,7 +15,7 @@ def create_connection():
         # user = url.username
         # password = url.password
         # host = url.hostname
-        # port = url.port
+        # port = url.porthttp://127.0.0.1:5000/
 
         # connection = psycopg2.connect(
         #              dbname=dbname,

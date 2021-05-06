@@ -1,5 +1,5 @@
+
 from collections import Counter
-#from app.database import create_connection
 from app.settings import create_connection
 from app.create_tables import create_table
 from app.create_tables import create_table_hash
@@ -204,7 +204,7 @@ def main(password):
         
         last_record = get_record(cur,"SELECT hash_t FROM hash_table ORDER BY id DESC LIMIT 1")
         print(last_record)
-        number_hash = get_hash("./app/xd.txt")
+        number_hash = get_hash(name_file)
         print(number_hash)
         create_size(con,length)
         if length_hash_table == 0 or number_hash != last_record:
@@ -327,6 +327,19 @@ def main(password):
 
     print('Time: ', stop - start)
 
+    if(numbits <= 1073741824):
+        message =u'La contraseña es muy débil'
+      
+        return message
+    elif numbits > 1073741824 and numbits <= 1099511627776:
+        return u"La contraseña es débil"
+    elif numbits > 1099511627776 and numbits <= 1152921504606846976:
+        return "La contraseña es aceptable"
+    elif numbits > 1152921504606846976 and numbits <= 1180591620717411303424:
+        return "La contraseña es segura"
+    else:
+        return "La contraseña es muy segura"
+    
     return int(2**(numbits))
 
 
