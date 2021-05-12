@@ -193,7 +193,7 @@ def main(password):
     cur = con.cursor() 
     name_file = "./app/xd.txt"
     # Hash section - check if a txt from passwords has been changed. If it has been changed, it's necessary to find again L1 and L2 values. 
-    ENV="PROD"
+    ENV="DEV"
     if ENV=="DEV":
         create_table_hash(con)
 
@@ -326,7 +326,8 @@ def main(password):
     numbits = int(2**(numbits))
     stop = timeit.default_timer()
 
-    print('Time: ', stop - start)
+    time = stop - start
+    print('Time: ', time)
 
     if(numbits <= 1073741824):
         message =u'La contraseña es muy débil',"1"
@@ -341,7 +342,7 @@ def main(password):
     else:
         return "La contraseña es muy segura", "5"
     
-    return int(2**(numbits))
+    
 
 
 
