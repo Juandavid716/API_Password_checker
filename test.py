@@ -8,6 +8,7 @@ def readFile():
         for line in lines:
              res = getTime(line)
              data.append(res)
+    print(data)
     print("el tiempo promedio es ", average(data))
     print("la desviacion estándar es ", statistics.stdev(data))
     

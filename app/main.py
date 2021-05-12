@@ -343,6 +343,7 @@ def main(password):
         return "La contraseña es muy segura", "5"
     
     
+    
 
 
 
