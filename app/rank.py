@@ -122,7 +122,7 @@ def rank_estimation(L1, L2, password,con, b):
                     pp2 = condition(pp2_result)
                     pp3 = condition(pp3_result)
                 
-                    if (pp1!=None and pp2!=None and pp3!=None ):
+                    if (pp1!=0 and pp2!=0 and pp3!=0 ):
                         if float(pp1)*float(pp2)*float(pp3)>maxProb:
                             maxProb=float(pp1)*float(pp2)*float(pp3)
                             print(maxProb)
@@ -183,20 +183,21 @@ def rank_estimation(L1, L2, password,con, b):
             pp3 = condition(pp3_result)
             pp4 = condition(pp4_result)
             pp5 = condition(pp5_result)
-          
-            print("La probabilidad de prefix es ",pp1)
-            print("La probabilidad de baseword es ",pp2)
-            print("La probabilidad de suffix es ",pp3)
-            print("La probabilidad de shift es ",pp4)
-            print("La probabilidad de 133t es ",pp5)
-            if (pp1!=None and pp2!=None and pp3!=None and pp4!=None and pp5!=None):
+            print("PROB 1", pp1)
+            print("PROB 2", pp2)
+            print("PROB 3", pp3)
+            print("PROB 4", pp4)
+            print("PROB 5", pp5)
+           
+            if (pp1!=0  and pp2!=0 and pp3!=0 and pp4!=0 and pp5!=0):
                 prob=float(pp1)*float(pp2)*float(pp3)*float(pp4)*float(pp5)
-                print("La probabilidad es ",prob)
+                
                 L=main2(L1,L2,prob,b)
              
                 L=sum(L)/2
-                
             else:
                 L=-5
+                
 
+    
     return L

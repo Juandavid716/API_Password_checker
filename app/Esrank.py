@@ -108,4 +108,5 @@ def get_L1_L2(P,d,gamma,b,p):
 
 def main2(L1,L2,p,b):  
     (lb,ub)= upperLower(L1,L2,p,b)
+    print(lb,ub)
     return (lb,ub)

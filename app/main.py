@@ -179,7 +179,11 @@ def get_133t_transformation(list_baseword):
     list_133t = []
     list_new_basewords = []
     for baseword in list_baseword:
-       baseword_transfomed, list_index = transform_133t(baseword)
+       if baseword.isnumeric() is True:
+           baseword_transfomed = baseword
+           list_index = "[]"
+       else:
+        baseword_transfomed, list_index = transform_133t(baseword)
        list_133t.append(list_index)
        list_new_basewords.append(baseword_transfomed.lower())
     return list_133t, list_new_basewords
@@ -189,11 +193,14 @@ def main(password):
     #Connection
     start = timeit.default_timer()
     con = create_connection()
-    print("Connected")
     cur = con.cursor() 
     name_file = "./app/xd.txt"
+    number_hash = get_hash(name_file)
     # Hash section - check if a txt from passwords has been changed. If it has been changed, it's necessary to find again L1 and L2 values. 
+
+    # Environment variable -> Decide to execute the algorithm in developemnt or production mode.
     ENV="PROD"
+
     if ENV=="DEV":
         create_table_hash(con)
 
@@ -203,9 +210,7 @@ def main(password):
         length_hash_table = get_record(cur,"SELECT COUNT(*) FROM hash_table")
         
         last_record = get_record(cur,"SELECT hash_t FROM hash_table ORDER BY id DESC LIMIT 1")
-        print(last_record)
-        number_hash = get_hash(name_file)
-        print(number_hash)
+        
         create_size(con,length)
         if length_hash_table == 0 or number_hash != last_record:
             
@@ -226,6 +231,7 @@ def main(password):
             list_shift = shift_pattern(list_baseword)
             print("shift list created")
             list_133t, list_baseword = get_133t_transformation(list_baseword)
+            print(list_baseword)
             print("133t list created")
 
             # List of probabilities
@@ -253,7 +259,8 @@ def main(password):
         
             
     # Update section
-    new_list = get_list("./app/passwords.txt")
+    name_update = "./app/passwords.txt"
+    new_list = get_list(name_update)
     lg_new_list= len(new_list)
 
 
@@ -261,21 +268,20 @@ def main(password):
             
             # get total size from original dataset.
             total = get_record(cur,"SELECT * FROM length_table ORDER BY length_t DESC LIMIT 1")
-            print(total)
             #Update the dataset
-            app.update.update_data("./app/passwords.txt",total)
+            app.update.update_data(name_update,total)
 
             #Update size 
             new_total = total + lg_new_list
             cur.execute("INSERT  INTO length_table (length_t) VALUES ({}) ON CONFLICT (length_t) DO NOTHING".format(new_total))
             con.commit()
             # Delete all elements from file with new passwords
-            file = open('./app/passwords.txt','w')
+            file = open(name_update,'w')
             file.close()
 
     # Get probabilities sorted by highest probability
     cur.execute("SELECT * FROM prefix_table ORDER BY CAST(probability as FLOAT) DESC ")
-    prefix_probabilities = cur.fetchall()
+    prefix_probabilities = cur.fetchall() 
     cur.execute("SELECT * FROM suffix_table ORDER BY CAST(probability as FLOAT) DESC ")
     suffix_probabilities = cur.fetchall() 
     cur.execute("SELECT * FROM baseword_table ORDER BY CAST(probability as FLOAT) DESC ")
@@ -285,6 +291,7 @@ def main(password):
     cur.execute("SELECT * FROM table_133t ORDER BY CAST(probability as FLOAT)  DESC ")
     t133_probabilities =  cur.fetchall() 
 
+    
     print("probabilities calculated")
         
     P1 = get_probability_sorted(prefix_probabilities)
@@ -292,20 +299,19 @@ def main(password):
     P3 = get_probability_sorted(baseword_probabilities)
     P4 = get_probability_sorted(shift_probabilities)
     P5 = get_probability_sorted(t133_probabilities)
-
+  
     print("Prob ordered")
-    # P = List of lists 
-    P = [P1,P2,P3,P4,P5]
+    dimensiones=5
+    P = [P1, P2, P3, P4, P5]
     LP = [len(P1),len(P2),len(P3),len(P4),len(P5)]
     minimum = np.min(LP)
-    print(minimum)
-    dimensiones=5
     b= minimum.item()
     gamma= (b+1) / b
-    p=P1[4]*P2[2]*P3[2]*P4[2]*P5[6]
-    
+    p=P1[4]*P2[2]*P3[2]*P4[2]*P5[1]
     if ENV=="DEV":
-        if length_hash_table == 0 or number_hash != last_record or lg_new_list>0 :
+        write_L1_L2(P,dimensiones, gamma,b,p )
+    else:
+        if lg_new_list>0:
             write_L1_L2(P,dimensiones, gamma,b,p )
             cur.execute("""INSERT INTO hash_table(hash_t) VALUES (%(player)s)""", {'player': number_hash })
             con.commit()
@@ -316,12 +322,15 @@ def main(password):
     numbits=0
     if R == -5:
         print("None")
+                  
+        numbits = 57
+       
     elif R == 0:
         print("Equals to 0")
     else:
         numbits=np.ceil(np.log2(R))
         print("Bits number", numbits)
-        print("With an enumeration of", int(2**(numbits)), " candidates passwords is possible to recover this password ")
+        
 
     numbits = int(2**(numbits))
     stop = timeit.default_timer()
