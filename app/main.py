@@ -188,6 +188,34 @@ def get_133t_transformation(list_baseword):
        list_new_basewords.append(baseword_transfomed.lower())
     return list_133t, list_new_basewords
 
+def getEnumerationTime(numbits):
+ intelIPC = int(2**(30))*109
+ numbits = int(2**(numbits))
+
+ res = numbits / intelIPC
+ # dias
+ if(res >= 31536000):
+   res = res/ 31536000
+   res = round(res,0) 
+   res = str(res) + " años"
+ elif(res >= 86400):
+   res = res / 86400
+   res = round(res,0) 
+   res = str(res) + " días"
+ elif (res > 3600):
+   res = res / 3600
+   res = round(res,0) 
+   res = str(res) + " horas"
+ elif (res > 60):
+   res = res / 60
+   res = round(res,0) 
+   res = str(res) + " minutos"
+ else:
+   res = round(res,4) 
+   res = str(res) + " segundos"
+ return res 
+
+
 
 def main(password):
     #Connection
@@ -331,25 +359,26 @@ def main(password):
         numbits=np.ceil(np.log2(R))
         print("Bits number", numbits)
         
-
+    value = numbits
     numbits = int(2**(numbits))
     stop = timeit.default_timer()
 
     time = stop - start
     print('Time: ', time)
-
+    
+    enumeration = getEnumerationTime(value)
     if(numbits <= 1073741824):
-        message =u'La contraseña es muy débil',"1"
+        message =u'La contraseña es muy débil',"1", enumeration
       
         return message
     elif numbits > 1073741824 and numbits <= 1099511627776:
-        return u"La contraseña es débil", "2"
+        return u"La contraseña es débil", "2" , enumeration
     elif numbits > 1099511627776 and numbits <= 1152921504606846976:
-        return "La contraseña es aceptable", "3"
+        return "La contraseña es aceptable", "3", enumeration
     elif numbits > 1152921504606846976 and numbits <= 1180591620717411303424:
-        return "La contraseña es segura", "4"
+        return "La contraseña es segura", "4" , enumeration
     else:
-        return "La contraseña es muy segura", "5"
+        return "La contraseña es muy segura", "5", enumeration
     
     
     
