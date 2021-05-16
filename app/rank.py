@@ -86,6 +86,16 @@ def condition(prob):
         result = prob[0]
     return result
 
+def newProbabilities(probList, minValue):
+    result = 1
+    print("Min value of prob",minValue)
+    for idx, val in enumerate(probList):
+        if val == 0:
+            val = minValue
+        result *= float(val)
+        
+    
+    return result
 
 
 def rank_estimation(L1, L2, password,con, b):
@@ -183,20 +193,27 @@ def rank_estimation(L1, L2, password,con, b):
             pp3 = condition(pp3_result)
             pp4 = condition(pp4_result)
             pp5 = condition(pp5_result)
+
             print("PROB 1", pp1)
             print("PROB 2", pp2)
             print("PROB 3", pp3)
             print("PROB 4", pp4)
             print("PROB 5", pp5)
+
+            probList = [pp1,pp2,pp3,pp4,pp5]
+
+            cur.execute("SELECT min(probability) FROM baseword_table")
+            minProb = condition(cur.fetchone())
+
+            prob = newProbabilities(probList,minProb)
            
-            if (pp1!=0  and pp2!=0 and pp3!=0 and pp4!=0 and pp5!=0):
-                prob=float(pp1)*float(pp2)*float(pp3)*float(pp4)*float(pp5)
+            #prob=float(pp1)*float(pp2)*float(pp3)*float(pp4)*float(pp5)
                 
-                L=main2(L1,L2,prob,b)
+            L=main2(L1,L2,prob,b)
              
-                L=sum(L)/2
-            else:
-                L=-5
+            L=sum(L)/2
+            
+               
                 
 
     
