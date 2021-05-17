@@ -100,7 +100,7 @@ def newProbabilities(probList, minValue):
 
 def rank_estimation(L1, L2, password,con, b):
     cur = con.cursor() 
-    
+    L = -5
     first=True
     last=True
     f=len(password)
