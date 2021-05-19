@@ -307,35 +307,47 @@ def main(password):
             file = open(name_update,'w')
             file.close()
 
-    # Get probabilities sorted by highest probability
-    cur.execute("SELECT * FROM prefix_table ORDER BY CAST(probability as FLOAT) DESC ")
-    prefix_probabilities = cur.fetchall() 
-    cur.execute("SELECT * FROM suffix_table ORDER BY CAST(probability as FLOAT) DESC ")
-    suffix_probabilities = cur.fetchall() 
-    cur.execute("SELECT * FROM baseword_table ORDER BY CAST(probability as FLOAT) DESC ")
-    baseword_probabilities = cur.fetchall() 
-    cur.execute("SELECT * FROM shift_table ORDER BY CAST(probability as FLOAT)  DESC ")
-    shift_probabilities =  cur.fetchall() 
-    cur.execute("SELECT * FROM table_133t ORDER BY CAST(probability as FLOAT)  DESC ")
-    t133_probabilities =  cur.fetchall() 
+    # Get probabilities sorted by highest probability (DEV)
+    # cur.execute("SELECT * FROM prefix_table ORDER BY CAST(probability as FLOAT) DESC ")
+    # prefix_probabilities = cur.fetchall() 
+    # cur.execute("SELECT * FROM suffix_table ORDER BY CAST(probability as FLOAT) DESC ")
+    # suffix_probabilities = cur.fetchall() 
+    # cur.execute("SELECT * FROM baseword_table ORDER BY CAST(probability as FLOAT) DESC ")
+    # baseword_probabilities = cur.fetchall() 
+    # cur.execute("SELECT * FROM shift_table ORDER BY CAST(probability as FLOAT)  DESC ")
+    # shift_probabilities =  cur.fetchall() 
+    # cur.execute("SELECT * FROM table_133t ORDER BY CAST(probability as FLOAT)  DESC ")
+    # t133_probabilities =  cur.fetchall() 
 
-    
+    # Get probabilities sorted by highest probability (PROD)
+    cur.execute("SELECT COUNT(*) FROM prefix_table")
+    P1 = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) FROM suffix_table")
+    P2 = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) FROM baseword_table")
+    P3 = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) FROM shift_table")
+    P4 = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) FROM table_133t")
+    P5 = cur.fetchone()[0]
+   
     print("probabilities calculated")
         
-    P1 = get_probability_sorted(prefix_probabilities)
-    P2 = get_probability_sorted(suffix_probabilities)
-    P3 = get_probability_sorted(baseword_probabilities)
-    P4 = get_probability_sorted(shift_probabilities)
-    P5 = get_probability_sorted(t133_probabilities)
-  
+    # P1 = get_probability_sorted(prefix_probabilities)
+    # P2 = get_probability_sorted(suffix_probabilities)
+    # P3 = get_probability_sorted(baseword_probabilities)
+    # P4 = get_probability_sorted(shift_probabilities)
+    # P5 = get_probability_sorted(t133_probabilities)
+
+
     print("Prob ordered")
     dimensiones=5
-    P = [P1, P2, P3, P4, P5]
-    LP = [len(P1),len(P2),len(P3),len(P4),len(P5)]
+    #P = [P1, P2, P3, P4, P5]
+    LP = [P1,P2,P3,P4,P5]
     minimum = np.min(LP)
     b= minimum.item()
     gamma= (b+1) / b
-    p=P1[4]*P2[2]*P3[2]*P4[2]*P5[1]
+    #p=P1[4]*P2[2]*P3[2]*P4[2]*P5[1]
     if ENV=="DEV":
         write_L1_L2(P,dimensiones, gamma,b,p )
     else:
