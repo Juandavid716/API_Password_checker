@@ -348,6 +348,8 @@ def main(password):
     b= minimum.item()
     gamma= (b+1) / b
     #p=P1[4]*P2[2]*P3[2]*P4[2]*P5[1]
+
+    #Dev Section
     if ENV=="DEV":
         write_L1_L2(P,dimensiones, gamma,b,p )
     else:
