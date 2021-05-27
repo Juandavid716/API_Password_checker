@@ -1,5 +1,5 @@
 from app.Esrank import main2
-
+import string
 def keyBoard(word):
     for w in word:
         if not (w.isdigit() or w.isalpha() or isSymbol(w)):
@@ -97,6 +97,11 @@ def newProbabilities(probList, minValue):
     
     return result
 
+def verifySimbols(password):
+    if all(i in string.punctuation for i in password):
+      return True
+    else:
+      return False
 
 def rank_estimation(L1, L2, password,con, b):
     cur = con.cursor() 
@@ -105,6 +110,9 @@ def rank_estimation(L1, L2, password,con, b):
     last=True
     f=len(password)
     l=-1
+    if(password.isdecimal() or verifySimbols(password)):
+        return L
+    
     if (password.isascii()): 
         for i in range(len(password)):
             if (not (password[i].isdigit() or isSymbol(password[i]) )) and (first==True):

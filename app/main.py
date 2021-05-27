@@ -363,7 +363,7 @@ def main(password):
     if R == -5:
         print("None")
                   
-        numbits = 57
+        numbits = 20
        
     elif R == 0:
         print("Equals to 0")
